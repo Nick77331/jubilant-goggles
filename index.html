@@ -62,7 +62,7 @@
     padding: 0 20px;
   }
 
-  /* Style for search results - mimic DuckDuckGo */
+  /* Style for search results */
   .result {
     background-color: #222;
     padding: 15px;
@@ -119,22 +119,20 @@
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
 
-      // DuckDuckGo HTML search results are in <div class="results">
-      const searchResults = doc.querySelectorAll('.result');
+      // DuckDuckGo results are in <a> tags inside <div class="result">
+      const links = doc.querySelectorAll('.result a');
 
-      if (searchResults.length === 0) {
+      if (links.length === 0) {
         responseDiv.innerHTML = '<p>No results found.</p>';
       } else {
         responseDiv.innerHTML = '';
-        searchResults.forEach(result => {
-          const title = result.querySelector('a')?.textContent || '';
-          const link = result.querySelector('a')?.href || '';
-          const snippet = result.querySelector('.snippet')?.textContent || '';
+        links.forEach(link => {
+          const url = link.href;
+          const title = link.textContent;
 
           responseDiv.innerHTML += `
             <div class="result">
-              <a href="${link}" target="_blank" rel="noopener noreferrer">${title}</a>
-              <p>${snippet}</p>
+              <a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a>
             </div>
           `;
         });
