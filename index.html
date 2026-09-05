@@ -3,64 +3,166 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Search</title>
-<!-- Your styles here (same as before) -->
+<title>My Search Engine</title>
 <style>
-  /* ... same styles as previous ... */
+  body {
+    font-family: Arial, sans-serif;
+    background: #fafafa;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .search-container {
+    margin-top: 150px;
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 50px;
+    margin-bottom: 20px;
+    color: #202124;
+    font-family: 'Roboto', sans-serif;
+  }
+
+  form {
+    display: flex;
+    width: 100%;
+  }
+
+  select, input[type="text"] {
+    padding: 14px 20px;
+    font-size: 18px;
+    border: 1px solid #dadce0;
+    border-radius: 24px;
+    outline: none;
+    flex: 1;
+    transition: box-shadow 0.2s;
+  }
+
+  select {
+    max-width: 150px;
+    margin-right: 10px;
+  }
+
+  input[type="text"]:focus {
+    box-shadow: 0 0 5px rgba(32,33,36,0.28);
+  }
+
+  button {
+    padding: 14px 20px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 24px;
+    background-color: #1a73e8;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  button:hover {
+    background-color: #1558b0;
+  }
+
+  #results {
+    width: 100%;
+    max-width: 800px;
+    margin-top: 30px;
+    padding: 0 20px;
+  }
+
+  .result {
+    background: #fff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(60,64,67,0.1);
+  }
+
+  .result a {
+    font-size: 20px;
+    color: #1a0dab;
+    text-decoration: none;
+  }
+
+  .result a:hover {
+    text-decoration: underline;
+  }
+
+  /* Responsive styles */
+  @media(max-width: 600px){
+    h1 { font-size: 36px; }
+    form { flex-direction: column; }
+    select, input[type="text"] {
+      max-width: 100%; margin-bottom: 10px; border-radius: 12px; }
+    button { width: 100%; border-radius: 12px; }
+  }
 </style>
 </head>
 <body>
-<h1>Search</h1>
-<form id="searchForm">
-  <input type="text" id="query" placeholder="Enter search term" required />
-  <select id="engine">
-    <option value="duckduckgo">DuckDuckGo</option>
-    <option value="google">Google</option>
-  </select>
-  <button type="submit">Search</button>
-</form>
 
-<div id="results"></div>
+<div class="search-container">
+  <h1>My Search</h1>
+  <form id="searchForm">
+    <select id="engine">
+      <option value="duckduckgo">DuckDuckGo</option>
+      <option value="google">Google</option>
+    </select>
+    <input type="text" id="query" placeholder="Search..." required />
+    <button type="submit">Search</button>
+  </form>
+  <div id="results"></div>
+</div>
 
 <script>
-  document.getElementById('searchForm').addEventListener('submit', async function(e) {
+  document.getElementById('searchForm').addEventListener('submit', async e => {
     e.preventDefault();
     const query = document.getElementById('query').value;
     const engine = document.getElementById('engine').value;
-    const responseDiv = document.getElementById('results');
-    responseDiv.innerHTML = '<p>Loading...</p>';
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = 'Loading...';
 
     try {
-      const response = await fetch(`/search?q=${encodeURIComponent(query)}&engine=${engine}`);
-      const html = await response.text();
+      const res = await fetch(`/search?q=${encodeURIComponent(query)}&engine=${engine}`);
+      const html = await res.text();
 
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
 
+      // Clear previous results
+      resultsDiv.innerHTML = '';
+
       if (engine === 'duckduckgo') {
+        // Extract search results links
         const links = doc.querySelectorAll('.result a');
         if (links.length === 0) {
-          responseDiv.innerHTML = '<p>No results found.</p>';
+          resultsDiv.innerHTML = '<p>No results found.</p>';
         } else {
-          responseDiv.innerHTML = '';
           links.forEach(link => {
             const url = link.href;
             const title = link.textContent;
-            responseDiv.innerHTML += `
+            resultsDiv.innerHTML += `
               <div class="result">
                 <a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a>
-              </div>
-            `;
+              </div>`;
           });
         }
       } else if (engine === 'google') {
-        // For Google, parsing is more complex; for simplicity, just show raw HTML
-        responseDiv.innerHTML = html;
+        // Google results are complex; show raw HTML or parse as needed
+        // For simplicity, just show the raw HTML
+        resultsDiv.innerHTML = html;
       }
     } catch (err) {
-      responseDiv.innerHTML = '<p>Error fetching results.</p>';
+      resultsDiv.innerHTML = '<p>Error fetching results.</p>';
     }
   });
 </script>
+
 </body>
 </html>
