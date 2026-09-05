@@ -3,67 +3,56 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>My Search Engine</title>
+<title>Google-like Search</title>
 <style>
   body {
-    font-family: Arial, sans-serif;
-    background: #fafafa;
     margin: 0;
-    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #fff;
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 100vh;
+    justify-content: center;
+    height: 100vh;
   }
 
-  .search-container {
-    margin-top: 150px;
+  .search-box {
     width: 100%;
     max-width: 600px;
-    text-align: center;
-  }
-
-  h1 {
-    font-size: 50px;
-    margin-bottom: 20px;
-    color: #202124;
-    font-family: 'Roboto', sans-serif;
-  }
-
-  form {
     display: flex;
-    width: 100%;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    border-radius: 24px;
+    padding: 10px 20px;
   }
 
-  select, input[type="text"] {
-    padding: 14px 20px;
-    font-size: 18px;
-    border: 1px solid #dadce0;
-    border-radius: 24px;
-    outline: none;
+  input[type="text"] {
     flex: 1;
-    transition: box-shadow 0.2s;
+    border: none;
+    outline: none;
+    font-size: 18px;
+    padding: 10px 15px;
+    border-radius: 24px;
   }
 
   select {
-    max-width: 150px;
     margin-right: 10px;
-  }
-
-  input[type="text"]:focus {
-    box-shadow: 0 0 5px rgba(32,33,36,0.28);
+    padding: 10px 15px;
+    border-radius: 24px;
+    border: 1px solid #ddd;
+    font-size: 16px;
   }
 
   button {
-    padding: 14px 20px;
-    margin-left: 10px;
+    background-color: #1a73e8;
+    color: #fff;
     border: none;
     border-radius: 24px;
-    background-color: #1a73e8;
-    color: white;
-    font-size: 18px;
+    padding: 10px 20px;
+    font-size: 16px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    margin-left: 10px;
+    transition: background 0.3s;
   }
 
   button:hover {
@@ -78,11 +67,8 @@
   }
 
   .result {
-    background: #fff;
     padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(60,64,67,0.1);
+    border-bottom: 1px solid #eee;
   }
 
   .result a {
@@ -95,38 +81,51 @@
     text-decoration: underline;
   }
 
-  /* Responsive styles */
+  /* Responsive */
   @media(max-width: 600px){
-    h1 { font-size: 36px; }
-    form { flex-direction: column; }
-    select, input[type="text"] {
-      max-width: 100%; margin-bottom: 10px; border-radius: 12px; }
-    button { width: 100%; border-radius: 12px; }
+    .search-box {
+      flex-direction: column;
+    }
+    input[type="text"] {
+      width: 100%;
+      margin-bottom: 10px;
+      border-radius: 12px;
+    }
+    select {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    button {
+      width: 100%;
+      border-radius: 12px;
+    }
   }
 </style>
 </head>
 <body>
 
-<div class="search-container">
-  <h1>My Search</h1>
-  <form id="searchForm">
-    <select id="engine">
-      <option value="duckduckgo">DuckDuckGo</option>
-      <option value="google">Google</option>
-    </select>
-    <input type="text" id="query" placeholder="Search..." required />
-    <button type="submit">Search</button>
-  </form>
-  <div id="results"></div>
+<div class="search-box">
+  <select id="engine">
+    <option value="duckduckgo">DuckDuckGo</option>
+    <option value="google">Google</option>
+  </select>
+  <input type="text" id="query" placeholder="Search the web" />
+  <button id="searchBtn">Search</button>
 </div>
 
+<div id="results"></div>
+
 <script>
-  document.getElementById('searchForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    const query = document.getElementById('query').value;
+  document.getElementById('searchBtn').addEventListener('click', async () => {
+    const query = document.getElementById('query').value.trim();
     const engine = document.getElementById('engine').value;
     const resultsDiv = document.getElementById('results');
     resultsDiv.innerHTML = 'Loading...';
+
+    if (!query) {
+      resultsDiv.innerHTML = 'Please enter a search term.';
+      return;
+    }
 
     try {
       const res = await fetch(`/search?q=${encodeURIComponent(query)}&engine=${engine}`);
@@ -135,11 +134,9 @@
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
 
-      // Clear previous results
       resultsDiv.innerHTML = '';
 
       if (engine === 'duckduckgo') {
-        // Extract search results links
         const links = doc.querySelectorAll('.result a');
         if (links.length === 0) {
           resultsDiv.innerHTML = '<p>No results found.</p>';
@@ -150,16 +147,16 @@
             resultsDiv.innerHTML += `
               <div class="result">
                 <a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a>
-              </div>`;
+              </div>
+            `;
           });
         }
       } else if (engine === 'google') {
-        // Google results are complex; show raw HTML or parse as needed
-        // For simplicity, just show the raw HTML
+        // Google results are complex; show raw HTML
         resultsDiv.innerHTML = html;
       }
-    } catch (err) {
-      resultsDiv.innerHTML = '<p>Error fetching results.</p>';
+    } catch (e) {
+      resultsDiv.innerHTML = 'Error fetching results.';
     }
   });
 </script>
