@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Search Proxy</title>
+</head>
+<body>
+  <h1>Search Proxy</h1>
+  <form id="searchForm">
+    <input type="text" id="query" name="q" placeholder="Enter search term" required />
+    <button type="submit">Search</button>
+  </form>
+  <div id="results"></div>
+
+  <script>
+    document.getElementById('searchForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const query = document.getElementById('query').value;
+      const responseDiv = document.getElementById('results');
+      responseDiv.innerHTML = 'Loading...';
+
+      try {
+        const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
+        const data = await response.text();
+        responseDiv.innerHTML = data;
+      } catch (err) {
+        responseDiv.innerHTML = 'Error fetching results.';
+      }
+    });
+  </script>
+</body>
+</html>
