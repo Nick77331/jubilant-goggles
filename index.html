@@ -1,33 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DuckDuckGo Search Proxy</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DuckDuckGo Search</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #131416;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  h1 {
+    margin-top: 50px;
+    font-size: 40px;
+    font-weight: normal;
+    color: #fff;
+  }
+
+  form {
+    margin-top: 30px;
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+  }
+
+  input[type="text"] {
+    flex: 1;
+    padding: 15px 20px;
+    font-size: 18px;
+    border: none;
+    border-radius: 25px 0 0 25px;
+    outline: none;
+  }
+
+  button {
+    padding: 15px 20px;
+    font-size: 18px;
+    border: none;
+    border-radius: 0 25px 25px 0;
+    background-color: #4e9af1;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  button:hover {
+    background-color: #3b80d8;
+  }
+
+  #results {
+    width: 100%;
+    max-width: 800px;
+    margin-top: 40px;
+    padding: 0 20px;
+  }
+
+  /* Style for search results - mimic DuckDuckGo */
+  .result {
+    background-color: #222;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+  }
+
+  .result a {
+    color: #4e9af1;
+    font-size: 18px;
+    text-decoration: none;
+  }
+
+  .result a:hover {
+    text-decoration: underline;
+  }
+
+  /* Responsive adjustments */
+  @media(max-width: 600px) {
+    h1 {
+      font-size: 30px;
+    }
+    input[type="text"] {
+      font-size: 16px;
+    }
+    button {
+      font-size: 16px;
+    }
+  }
+</style>
 </head>
 <body>
-  <h1>DuckDuckGo Search Proxy</h1>
-  <form id="searchForm">
-    <input type="text" id="query" name="q" placeholder="Enter search term" required />
-    <button type="submit">Search</button>
-  </form>
-  <div id="results"></div>
 
-  <script>
-    document.getElementById('searchForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const query = document.getElementById('query').value;
-      const responseDiv = document.getElementById('results');
-      responseDiv.innerHTML = 'Loading...';
+<h1>DuckDuckGo</h1>
+<form id="searchForm">
+  <input type="text" id="query" placeholder="Search the web" required />
+  <button type="submit">Search</button>
+</form>
 
-      try {
-        const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
-        const data = await response.text();
-        responseDiv.innerHTML = data;
-      } catch (err) {
-        responseDiv.innerHTML = 'Error fetching results.';
+<div id="results"></div>
+
+<script>
+  document.getElementById('searchForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const query = document.getElementById('query').value;
+    const responseDiv = document.getElementById('results');
+    responseDiv.innerHTML = '<p>Loading...</p>';
+
+    try {
+      const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
+      const html = await response.text();
+
+      // Parse the HTML to extract search results
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      // DuckDuckGo HTML search results are in <div class="results">
+      const searchResults = doc.querySelectorAll('.result');
+
+      if (searchResults.length === 0) {
+        responseDiv.innerHTML = '<p>No results found.</p>';
+      } else {
+        responseDiv.innerHTML = '';
+        searchResults.forEach(result => {
+          const title = result.querySelector('a')?.textContent || '';
+          const link = result.querySelector('a')?.href || '';
+          const snippet = result.querySelector('.snippet')?.textContent || '';
+
+          responseDiv.innerHTML += `
+            <div class="result">
+              <a href="${link}" target="_blank" rel="noopener noreferrer">${title}</a>
+              <p>${snippet}</p>
+            </div>
+          `;
+        });
       }
-    });
-  </script>
+    } catch (err) {
+      responseDiv.innerHTML = '<p>Error fetching results.</p>';
+    }
+  });
+</script>
+
 </body>
 </html>
