@@ -3,55 +3,48 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Google</title>
+<title>Google Search Clone</title>
 <style>
-  /* Reset some default styles */
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
   body {
     font-family: Arial, sans-serif;
-    background-color: #fff;
-    height: 100vh;
+    background: #fff;
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 100vh;
     justify-content: center;
   }
 
-  /* Google logo placeholder - replace with actual logo if desired */
+  /* Logo */
   .logo {
+    background-image: url('https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png');
+    background-size: contain;
+    background-repeat: no-repeat;
     width: 272px;
     height: 92px;
-    background: url('https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png') no-repeat center/contain;
     margin-bottom: 20px;
   }
 
-  /* Search box container styled like Google */
+  /* Search box */
   .search-box {
     display: flex;
     align-items: center;
-    max-width: 600px;
     width: 100%;
+    max-width: 600px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     border-radius: 24px;
     padding: 10px 20px;
   }
 
-  /* Input styles */
   input[type="text"] {
     flex: 1;
-    font-size: 16px;
     border: none;
     outline: none;
+    font-size: 16px;
     padding: 10px 15px;
     border-radius: 24px;
   }
 
-  /* Dropdown style */
   select {
     margin-right: 10px;
     padding: 8px 12px;
@@ -60,16 +53,35 @@
     border: 1px solid #dadce0;
   }
 
-  /* Search button is hidden, search is triggered by Enter key */
-  button {
-    display: none;
-  }
-
-  /* Results container */
+  /* Results area */
   #results {
-    margin-top: 20px;
     width: 100%;
     max-width: 800px;
+    margin-top: 20px;
+    padding: 0 20px;
+  }
+
+  /* Individual result styling */
+  .result {
+    padding: 15px 0;
+    border-bottom: 1px solid #eaeaea;
+  }
+
+  .result a {
+    font-size: 20px;
+    color: #1a0dab;
+    text-decoration: none;
+  }
+
+  .result a:hover {
+    text-decoration: underline;
+  }
+
+  /* Responsive */
+  @media(max-width: 600px){
+    body {
+      padding: 10px;
+    }
   }
 </style>
 </head>
@@ -79,20 +91,25 @@
 <div class="logo"></div>
 
 <!-- Search form -->
-<form id="searchForm" class="search-box" onsubmit="return false;">
+<div class="search-box">
   <select id="engine">
     <option value="duckduckgo">DuckDuckGo</option>
     <option value="google">Google</option>
   </select>
-  <input type="text" id="query" placeholder="Search" autofocus />
-</form>
+  <input type="text" id="query" placeholder="Search" />
+</div>
 
-<!-- Search results -->
+<!-- Results container -->
 <div id="results"></div>
 
 <script>
-  // Trigger search on Enter keypress
-  document.getElementById('query').addEventListener('keydown', function(e) {
+  document.querySelector('.search-box').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      performSearch();
+    }
+  });
+
+  document.querySelector('#query').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       performSearch();
     }
@@ -104,14 +121,9 @@
     const resultsDiv = document.getElementById('results');
     resultsDiv.innerHTML = 'Loading...';
 
-    if (!query) {
-      resultsDiv.innerHTML = '';
-      return;
-    }
-
     try {
-      const response = await fetch(`/search?q=${encodeURIComponent(query)}&engine=${engine}`);
-      const html = await response.text();
+      const res = await fetch(`/search?q=${encodeURIComponent(query)}&engine=${engine}`);
+      const html = await res.text();
 
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
@@ -127,16 +139,16 @@
             const url = link.href;
             const title = link.textContent;
             resultsDiv.innerHTML += `
-              <div style="margin-bottom:15px;">
-                <a href="${url}" target="_blank" rel="noopener noreferrer" style="font-size:20px;color:#1a0dab;text-decoration:none;">${title}</a>
+              <div class="result">
+                <a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a>
               </div>`;
           });
         }
-      } else {
-        // Google results - show raw HTML for demo
+      } else if (engine === 'google') {
+        // Show raw HTML for Google (not styled)
         resultsDiv.innerHTML = html;
       }
-    } catch (err) {
+    } catch (error) {
       resultsDiv.innerHTML = 'Error fetching results.';
     }
   }
