@@ -1,29 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Roblox Game Viewer</title>
+    <title>Roblox Game Embedder</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
             background-color: #f0f0f0;
+            text-align: center;
             padding: 20px;
         }
         input {
-            width: 300px;
+            width: 250px;
             padding: 10px;
             font-size: 16px;
+            margin-right: 10px;
         }
         button {
             padding: 10px 20px;
             font-size: 16px;
-            margin-left: 10px;
             cursor: pointer;
         }
-        #gameFrame {
+        #gameContainer {
             margin-top: 30px;
             width: 100%;
+            max-width: 800px;
             height: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            border: 2px solid #ccc;
+            background-color: #fff;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
             border: none;
         }
     </style>
@@ -34,18 +43,25 @@
     <input type="text" id="gameIdInput" placeholder="Roblox Game ID" />
     <button onclick="loadGame()">Load Game</button>
 
-    <div id="embedContainer"></div>
+    <div id="gameContainer">
+        <!-- Embedded game will appear here -->
+    </div>
 
     <script>
         function loadGame() {
             const gameId = document.getElementById('gameIdInput').value.trim();
-            if (!gameId) {
-                alert('Please enter a valid Roblox game ID.');
+            const container = document.getElementById('gameContainer');
+
+            if (!gameId || isNaN(gameId)) {
+                alert('Please enter a valid numeric Roblox Game ID.');
                 return;
             }
+
+            // Roblox embed URL format
             const embedUrl = `https://www.roblox.com/games/embed?placeId=${gameId}`;
-            const iframeHtml = `<iframe id="gameFrame" src="${embedUrl}" allowfullscreen></iframe>`;
-            document.getElementById('embedContainer').innerHTML = iframeHtml;
+
+            // Create iframe element
+            container.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
         }
     </script>
 </body>
