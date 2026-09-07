@@ -1,158 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Google Search Clone</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100vh;
-    justify-content: center;
-  }
-
-  /* Logo */
-  .logo {
-    background-image: url('https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    width: 272px;
-    height: 92px;
-    margin-bottom: 20px;
-  }
-
-  /* Search box */
-  .search-box {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    max-width: 600px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    border-radius: 24px;
-    padding: 10px 20px;
-  }
-
-  input[type="text"] {
-    flex: 1;
-    border: none;
-    outline: none;
-    font-size: 16px;
-    padding: 10px 15px;
-    border-radius: 24px;
-  }
-
-  select {
-    margin-right: 10px;
-    padding: 8px 12px;
-    font-size: 14px;
-    border-radius: 24px;
-    border: 1px solid #dadce0;
-  }
-
-  /* Results area */
-  #results {
-    width: 100%;
-    max-width: 800px;
-    margin-top: 20px;
-    padding: 0 20px;
-  }
-
-  /* Individual result styling */
-  .result {
-    padding: 15px 0;
-    border-bottom: 1px solid #eaeaea;
-  }
-
-  .result a {
-    font-size: 20px;
-    color: #1a0dab;
-    text-decoration: none;
-  }
-
-  .result a:hover {
-    text-decoration: underline;
-  }
-
-  /* Responsive */
-  @media(max-width: 600px){
-    body {
-      padding: 10px;
-    }
-  }
-</style>
+    <title>Mini Roblox Clone</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }
+        h1 { text-align: center; }
+        #messages { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; background: #fff; margin-bottom: 20px; }
+        #messages li { padding: 8px 12px; border-bottom: 1px solid #eee; }
+        #form { display: flex; justify-content: center; }
+        #input { width: 80%; padding: 10px; font-size: 16px; }
+        button { padding: 10px 20px; font-size: 16px; margin-left: 10px; cursor: pointer; }
+        /* Optional: add some hover effects */
+        button:hover { background-color: #ddd; }
+    </style>
 </head>
 <body>
+    <h1>Mini Roblox Clone</h1>
+    <ul id="messages"></ul>
+    <form id="form" autocomplete="off">
+        <input id="input" autocomplete="off" placeholder="Type a message..." />
+        <button>Send</button>
+    </form>
 
-<!-- Google Logo -->
-<div class="logo"></div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
 
-<!-- Search form -->
-<div class="search-box">
-  <select id="engine">
-    <option value="duckduckgo">DuckDuckGo</option>
-    <option value="google">Google</option>
-  </select>
-  <input type="text" id="query" placeholder="Search" />
-</div>
+        const form = document.getElementById('form');
+        const input = document.getElementById('input');
+        const messages = document.getElementById('messages');
 
-<!-- Results container -->
-<div id="results"></div>
+        // When user submits the form, send message
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (input.value.trim() !== '') {
+                socket.emit('chat message', input.value);
+                input.value = '';
+                input.focus();
+            }
+        });
 
-<script>
-  document.querySelector('.search-box').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      performSearch();
-    }
-  });
-
-  document.querySelector('#query').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      performSearch();
-    }
-  });
-
-  async function performSearch() {
-    const query = document.getElementById('query').value.trim();
-    const engine = document.getElementById('engine').value;
-    const resultsDiv = document.getElementById('results');
-    resultsDiv.innerHTML = 'Loading...';
-
-    try {
-      const res = await fetch(`/search?q=${encodeURIComponent(query)}&engine=${engine}`);
-      const html = await res.text();
-
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-
-      resultsDiv.innerHTML = '';
-
-      if (engine === 'duckduckgo') {
-        const links = doc.querySelectorAll('.result a');
-        if (links.length === 0) {
-          resultsDiv.innerHTML = '<p>No results found.</p>';
-        } else {
-          links.forEach(link => {
-            const url = link.href;
-            const title = link.textContent;
-            resultsDiv.innerHTML += `
-              <div class="result">
-                <a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a>
-              </div>`;
-          });
-        }
-      } else if (engine === 'google') {
-        // Show raw HTML for Google (not styled)
-        resultsDiv.innerHTML = html;
-      }
-    } catch (error) {
-      resultsDiv.innerHTML = 'Error fetching results.';
-    }
-  }
-</script>
-
+        // When a message is received, add it to the message list
+        socket.on('chat message', (data) => {
+            const li = document.createElement('li');
+            li.textContent = `${data.id}: ${data.msg}`;
+            messages.appendChild(li);
+            // Scroll to the latest message
+            messages.scrollTop = messages.scrollHeight;
+        });
+    </script>
 </body>
 </html>
