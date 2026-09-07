@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mini Roblox Prototype</title>
+    <style>
+        canvas { background: #eee; display: block; margin: 0 auto; }
+        body { text-align: center; font-family: Arial; }
+    </style>
+</head>
+<body>
+    <h1>Mini Roblox Prototype</h1>
+    <canvas id="gameCanvas" width="500" height="500"></canvas>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let players = {};
+
+        socket.on('currentPlayers', (playersData) => {
+            players = playersData;
+            draw();
+        });
+
+        socket.on('newPlayer', (player) => {
+            players[player.id] = player.position;
+            draw();
+        });
+
+        socket.on('playerMoved', (player) => {
+            if (players[player.id]) {
+                players[player.id] = player.position;
+                draw();
+            }
+        });
+
+        socket.on('removePlayer', (id) => {
+            delete players[id];
+            draw();
+        });
+
+        // Draw all players
+        function draw() {
+            ctx.clearRect(0, 0, 500, 500);
+            for (const id in players) {
+                const p = players[id];
+                ctx.fillStyle = id === socket.id ? 'blue' : 'red';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Handle keyboard input for movement
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp') socket.emit('move', 'up');
+            if (e.key === 'ArrowDown') socket.emit('move', 'down');
+            if (e.key === 'ArrowLeft') socket.emit('move', 'left');
+            if (e.key === 'ArrowRight') socket.emit('move', 'right');
+        });
+    </script>
+</body>
+</html>
