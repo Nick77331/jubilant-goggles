@@ -1,64 +1,52 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Mini Roblox Prototype</title>
+    <title>Roblox Game Viewer</title>
     <style>
-        canvas { background: #eee; display: block; margin: 0 auto; }
-        body { text-align: center; font-family: Arial; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        input {
+            width: 300px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        #gameFrame {
+            margin-top: 30px;
+            width: 100%;
+            height: 600px;
+            border: none;
+        }
     </style>
 </head>
 <body>
-    <h1>Mini Roblox Prototype</h1>
-    <canvas id="gameCanvas" width="500" height="500"></canvas>
-    <script src="/socket.io/socket.io.js"></script>
+    <h1>Embed Roblox Game</h1>
+    <p>Enter Roblox Game ID to view:</p>
+    <input type="text" id="gameIdInput" placeholder="Roblox Game ID" />
+    <button onclick="loadGame()">Load Game</button>
+
+    <div id="embedContainer"></div>
+
     <script>
-        const socket = io();
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-
-        let players = {};
-
-        socket.on('currentPlayers', (playersData) => {
-            players = playersData;
-            draw();
-        });
-
-        socket.on('newPlayer', (player) => {
-            players[player.id] = player.position;
-            draw();
-        });
-
-        socket.on('playerMoved', (player) => {
-            if (players[player.id]) {
-                players[player.id] = player.position;
-                draw();
+        function loadGame() {
+            const gameId = document.getElementById('gameIdInput').value.trim();
+            if (!gameId) {
+                alert('Please enter a valid Roblox game ID.');
+                return;
             }
-        });
-
-        socket.on('removePlayer', (id) => {
-            delete players[id];
-            draw();
-        });
-
-        // Draw all players
-        function draw() {
-            ctx.clearRect(0, 0, 500, 500);
-            for (const id in players) {
-                const p = players[id];
-                ctx.fillStyle = id === socket.id ? 'blue' : 'red';
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            const embedUrl = `https://www.roblox.com/games/embed?placeId=${gameId}`;
+            const iframeHtml = `<iframe id="gameFrame" src="${embedUrl}" allowfullscreen></iframe>`;
+            document.getElementById('embedContainer').innerHTML = iframeHtml;
         }
-
-        // Handle keyboard input for movement
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowUp') socket.emit('move', 'up');
-            if (e.key === 'ArrowDown') socket.emit('move', 'down');
-            if (e.key === 'ArrowLeft') socket.emit('move', 'left');
-            if (e.key === 'ArrowRight') socket.emit('move', 'right');
-        });
     </script>
 </body>
 </html>
