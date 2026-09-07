@@ -1,68 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Roblox Game Embedder</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            text-align: center;
-            padding: 20px;
-        }
-        input {
-            width: 250px;
-            padding: 10px;
-            font-size: 16px;
-            margin-right: 10px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        #gameContainer {
-            margin-top: 30px;
-            width: 100%;
-            max-width: 800px;
-            height: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            border: 2px solid #ccc;
-            background-color: #fff;
-        }
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Roblox Game Embed</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    text-align: center;
+    padding: 20px;
+  }
+  input {
+    width: 250px;
+    padding: 10px;
+    font-size: 16px;
+    margin-right: 10px;
+  }
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  #gameContainer {
+    margin-top: 30px;
+    width: 100%;
+    max-width: 800px;
+    height: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    border: 2px solid #ccc;
+    background-color: #fff;
+  }
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+</style>
 </head>
 <body>
-    <h1>Embed Roblox Game</h1>
-    <p>Enter Roblox Game ID to view:</p>
-    <input type="text" id="gameIdInput" placeholder="Roblox Game ID" />
-    <button onclick="loadGame()">Load Game</button>
+<h1>Embed Roblox Game</h1>
+<p>Enter Roblox Game ID to view:</p>
+<input type="text" id="gameIdInput" placeholder="Roblox Game ID" />
+<button onclick="loadGame()">Load Game</button>
 
-    <div id="gameContainer">
-        <!-- Embedded game will appear here -->
-    </div>
+<div id="gameContainer"></div>
 
-    <script>
-        function loadGame() {
-            const gameId = document.getElementById('gameIdInput').value.trim();
-            const container = document.getElementById('gameContainer');
+<script>
+  function loadGame() {
+    const gameId = document.getElementById('gameIdInput').value.trim();
+    const container = document.getElementById('gameContainer');
 
-            if (!gameId || isNaN(gameId)) {
-                alert('Please enter a valid numeric Roblox Game ID.');
-                return;
-            }
+    if (!gameId || isNaN(gameId)) {
+      alert('Please enter a valid numeric Roblox Game ID.');
+      return;
+    }
 
-            // Roblox embed URL format
-            const embedUrl = `https://www.roblox.com/games/embed?placeId=${gameId}`;
+    // Roblox embed URL pattern
+    const embedUrl = `https://www.roblox.com/games/embed?placeId=${gameId}`;
 
-            // Create iframe element
-            container.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
-        }
-    </script>
+    // Insert iframe into container
+    container.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
+  }
+</script>
 </body>
 </html>
